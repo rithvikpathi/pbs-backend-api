@@ -5,3 +5,5 @@ networkx
 pydantic
 pytest
 httpx
+clerk-backend-api  
+python-jose         
