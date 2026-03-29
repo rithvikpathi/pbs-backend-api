@@ -1,8 +1,8 @@
-from fastapi import HTTPException, Security
+from fastapi import HTTPException, Security, Depends
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from jose import jwt
 import requests
-import config
+from functools import lru_cache
 
 security = HTTPBearer()
 
@@ -10,12 +10,19 @@ TENANT_ID = "3020aae9-3196-4f1e-b919-6561c2e2f688"
 CLIENT_ID = "3735e031-4ef2-4c7c-b132-702efcfe6c04"
 JWKS_URL = f"https://login.microsoftonline.com/{TENANT_ID}/discovery/v2.0/keys"
 
+# --- THE FIX: Caching the keys ---
+@lru_cache(maxsize=1)
 def get_jwks():
-    return requests.get(JWKS_URL).json()
+    """Fetches Microsoft's public keys once and caches them in memory."""
+    try:
+        return requests.get(JWKS_URL).json()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="Failed to fetch Microsoft JWKS.")
 
 def require_edu_email(
     credentials: HTTPAuthorizationCredentials = Security(security)
 ) -> dict:
+    """Verifies the JWT and strictly enforces a .edu email address."""
     token = credentials.credentials
 
     try:
@@ -24,8 +31,14 @@ def require_edu_email(
         
         key = next((k for k in jwks["keys"] if k["kid"] == header["kid"]), None)
         if not key:
-            raise HTTPException(status_code=401, detail="Invalid token key.")
+            # If the key isn't found, clear the cache and try fetching fresh keys
+            get_jwks.cache_clear()
+            jwks = get_jwks()
+            key = next((k for k in jwks["keys"] if k["kid"] == header["kid"]), None)
+            if not key:
+                raise HTTPException(status_code=401, detail="Invalid token key signature.")
 
+        # Verify the token payload
         payload = jwt.decode(
             token,
             key,
@@ -33,12 +46,13 @@ def require_edu_email(
             audience=CLIENT_ID,
         )
 
+        # Extract email and enforce the college demographic
         email = payload.get("preferred_username") or payload.get("email", "")
 
         if not email.endswith(".edu"):
             raise HTTPException(
                 status_code=403,
-                detail=f"Students only. '{email}' is not a .edu address."
+                detail=f"Access Denied. '{email}' is not a valid university address."
             )
 
         return {"email": email, "payload": payload}
