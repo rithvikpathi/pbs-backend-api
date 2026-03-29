@@ -49,8 +49,10 @@ def smart_route(
     start_lat: float = Query(...),
     start_lon: float = Query(...),
     end_lat: float = Query(...),
-    end_lon: float = Query(...)
+    end_lon: float = Query(...),
+    user_data: dict = Depends(require_edu_email)
 ):
+    print(f"Authorized user: {user_data['email']}")
     """The core MVP feature: calculates the optimal 30-min node-hopping route."""
     stations = services.get_live_routing_stations()
     if not stations:
