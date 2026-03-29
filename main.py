@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from routers import relay
+from fastapi.middleware.cors import CORSMiddleware
 
 # --- APP INITIALIZATION ---
 app = FastAPI(
@@ -10,6 +11,14 @@ app = FastAPI(
 
 # Plug in all the API routes we just built
 app.include_router(relay.router)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173", "https://your-production-url.com"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.get("/", tags=["Root"])
 def read_root():
