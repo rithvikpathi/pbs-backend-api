@@ -1,0 +1,71 @@
+# INDY RELAY API - SYSTEM CONTEXT FOR AI AGENTS
+Project: Urban mobility routing app for Pacers Bikeshare.
+Core Tech: FastAPI (Python), NetworkX (Routing), GBFS real-time data.
+
+## BASE URL
+- Local Development: http://127.0.0.1:8000
+- Production: [Insert your DigitalOcean/Vultr URL here]
+
+## ENDPOINTS DIRECTORY
+
+### 1. Root Check
+- Endpoint: `GET /`
+- Purpose: Health check to ensure the API is live.
+- Returns: JSON object with a status message.
+
+### 2. Static Station Directory
+- Endpoint: `GET /stations`
+- Purpose: Retrieves all static data for the bikeshare system.
+- Returns: Array of station objects.
+- Key Fields Returned: `station_id` (string), `name` (string), `lat` (float), `lon` (float), `capacity` (int).
+
+### 3. Live Station Status
+- Endpoint: `GET /status`
+- Purpose: Retrieves live availability for the network.
+- Returns: Array of status objects.
+- Key Fields Returned: `station_id` (string), `num_bikes_available` (int), `num_docks_available` (int).
+
+### 4. System Pricing
+- Endpoint: `GET /pricing`
+- Purpose: Retrieves current pass options and pricing.
+- Returns: Array of pricing plan objects.
+
+### 5. Single Station Detail
+- Endpoint: `GET /station/{station_id}`
+- Purpose: Fuses static data and live status for one specific dock.
+- Path Parameter: `station_id` (string, required).
+- Returns: JSON Object.
+- Schema:
+  {
+    "station_id": "string",
+    "name": "string",
+    "capacity": 0,
+    "bikes_available": 0,
+    "docks_available": 0,
+    "lat": 0.0,
+    "lon": 0.0
+  }
+- Errors: Returns 404 if the station ID does not exist.
+
+### 6. Smart Relay Routing (CORE FEATURE)
+- Endpoint: `GET /smart_route`
+- Purpose: Calculates the optimal node-hopping route to ensure the user never exceeds the 30-minute free ride limit between docks.
+- Query Parameters:
+  - `start_lat` (float, required): User's starting latitude.
+  - `start_lon` (float, required): User's starting longitude.
+  - `end_lat` (float, required): Final destination latitude.
+  - `end_lon` (float, required): Final destination longitude.
+- Returns: JSON Object (`RouteResponse`).
+- Schema:
+  {
+    "total_stations_used": int,
+    "route": [
+      {
+        "from_location": "string",
+        "to_location": "string",
+        "distance_km": float,
+        "mode": "string" // Either "walk" or "bike"
+      }
+    ]
+  }
+- Errors: Returns 503 if zero bikes are available system-wide. Returns 422 if coordinates are missing or invalid.

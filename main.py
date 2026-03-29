@@ -14,3 +14,5 @@ app.include_router(relay.router)
 @app.get("/", tags=["Root"])
 def read_root():
     return {"message": "Indy Relay API is firing on all cylinders. Hit /docs to view the dashboard."}
+
+    ## python -m uvicorn main:app --reload to run
