@@ -25,3 +25,4 @@ htmlcov/
 
 # AI & Internal Context
 api_context.txt
+claude_context.txt
