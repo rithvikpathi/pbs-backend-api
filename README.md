@@ -1,21 +1,15 @@
-🚴 Relay
+**🚴 Relay**
+Smart bikeshare routing for Indianapolis — powered by Pacers Bikeshare GBFS data
 
-Relay is a program real-time bikeshare data from GBFS feeds and intelligently optimizes bike routes to maximize usage of the Indy Rides Free Pass from the Pacers Bikeshare program.
+**What is Relay?**
+Relay is a real-time urban bikeshare navigation app built for Indianapolis. It streams live station data from the GBFS feed and uses a custom graph-based routing algorithm to break long trips into free-ride segments — keeping every leg under the Indy Rides Free Pass 30-minute window.
+Think of it as Google Maps meets Pacers Bikeshare, optimized for people who want to ride for free.
 
-🚀 Overview
+**How It Works**
+The Pacers Bikeshare free pass lets riders take trips under a time limit at no cost. Relay exploits this by:
 
-Relay is designed to make urban biking in Indianapolis more efficient and cost-effective by leveraging:
-
-GBFS (General Bikeshare Feed Specification) data for real-time station and bike availability
-Route optimization logic to maximize free ride eligibility
-Smart decision-making to help users avoid overage charges
-
-The API acts as the brain behind a potential frontend app, handling all computation, data aggregation, and optimization.
-
-🧠 Core Idea
-
-The Indy Rides Free pass allows riders to take trips under a certain time limit for free. Relay optimizes routes by:
-
-Breaking longer trips into multiple valid segments
-Routing through strategically placed docking stations
-Ensuring each segment stays within the free ride window
+ - Fetching real-time station availability from the GBFS feed
+ - Building a weighted graph of the bikeshare network using NetworkX
+ - Running a shortest-path algorithm that respects the MAX_RIDE_KM = 7.5 constraint (~25-minute ride buffer)
+ - Returning a multi-hop route — walk to station → bike → dock → walk to station → bike → dock → ... walk to destination
+ - Enriching each segment with turn-by-turn directions via the Mapbox Directions API
