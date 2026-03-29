@@ -1,5 +1,6 @@
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Query, Depends
 import networkx as nx
+from auth import require_edu_email
 
 from models import RouteResponse, Segment
 import services
