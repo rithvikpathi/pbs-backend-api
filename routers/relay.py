@@ -1,12 +1,23 @@
 from fastapi import APIRouter, HTTPException, Query, Depends
+from pydantic import BaseModel
 import networkx as nx
-from auth import require_edu_email
+from auth import require_edu_email, create_access_token
 
 from models import RouteResponse, Segment
 import services
 
 # --- API ROUTES ---
 router = APIRouter()
+
+class LoginRequest(BaseModel):
+    email: str
+
+@router.post("/login", tags=["Auth"])
+def login(req: LoginRequest):
+    """Checks the email and issues a token if it's a university address."""
+    if not req.email.endswith(".edu"):
+        raise HTTPException(status_code=403, detail="Must use a valid .edu email.")
+    return {"access_token": create_access_token(req.email)}
 
 @router.get("/stations", tags=["Stations"])
 def get_stations():
