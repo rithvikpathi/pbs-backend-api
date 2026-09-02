@@ -14,7 +14,6 @@ The Pacers Bikeshare free pass lets riders take trips under a time limit at no c
  - Returning a multi-hop route — walk to station → bike → dock → walk to station → bike → dock → ... walk to destination
  - Enriching each segment with turn-by-turn directions via the Mapbox Directions API
 
-
 Pitch:
 Most bikeshare users don’t realize they’re leaving free rides on the table — not because the system is bad, but because navigation isn’t optimized for how pricing actually works.
 
